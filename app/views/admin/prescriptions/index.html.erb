@@ -81,5 +81,50 @@
       <% end %>
     </div>
 
+    <%# Paginação %>
+    <% if @pagy.pages > 1 %>
+      <%
+        current = @pagy.page
+        total   = @pagy.pages
+        window  = 2
+        pages_to_show = (1..total).select { |n| n == 1 || n == total || (n - current).abs <= window }
+      %>
+      <div class="flex items-center justify-between mt-5">
+        <p class="text-sm text-[#64748b]">
+          Mostrando <span class="font-medium text-[#1e293b]"><%= @pagy.from %>–<%= @pagy.to %></span>
+          de <span class="font-medium text-[#1e293b]"><%= @pagy.count %></span> prescrições
+        </p>
+        <div class="flex items-center gap-1.5">
+          <% if @pagy.previous %>
+            <%= link_to "←", admin_prescriptions_path(q: @query, page: @pagy.previous),
+                class: "px-3 py-1.5 text-sm border-2 border-[#e2e8f0] rounded-lg text-[#64748b] hover:border-violet-400 hover:text-violet-600 transition-all" %>
+          <% else %>
+            <span class="px-3 py-1.5 text-sm border-2 border-[#e2e8f0] rounded-lg text-[#d1d5db] cursor-not-allowed">←</span>
+          <% end %>
+
+          <% prev_shown = nil %>
+          <% pages_to_show.each do |n| %>
+            <% if prev_shown && n - prev_shown > 1 %>
+              <span class="px-2 py-1.5 text-sm text-[#94a3b8]">…</span>
+            <% end %>
+            <% if n == current %>
+              <span class="px-3 py-1.5 text-sm border-2 border-violet-500 bg-violet-500 text-white rounded-lg font-medium"><%= n %></span>
+            <% else %>
+              <%= link_to n, admin_prescriptions_path(q: @query, page: n),
+                  class: "px-3 py-1.5 text-sm border-2 border-[#e2e8f0] rounded-lg text-[#64748b] hover:border-violet-400 hover:text-violet-600 transition-all" %>
+            <% end %>
+            <% prev_shown = n %>
+          <% end %>
+
+          <% if @pagy.next %>
+            <%= link_to "→", admin_prescriptions_path(q: @query, page: @pagy.next),
+                class: "px-3 py-1.5 text-sm border-2 border-[#e2e8f0] rounded-lg text-[#64748b] hover:border-violet-400 hover:text-violet-600 transition-all" %>
+          <% else %>
+            <span class="px-3 py-1.5 text-sm border-2 border-[#e2e8f0] rounded-lg text-[#d1d5db] cursor-not-allowed">→</span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
   </div>
 </div>

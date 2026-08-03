@@ -4,8 +4,8 @@ class Admin::PrescriptionsController < ApplicationController
 
   def index
     @query = params[:q]
-    @prescriptions = @query.present? ? Prescription.search(@query).ordered : Prescription.ordered
-    @prescriptions = @prescriptions.includes(:creator, :updater)
+    scope = (@query.present? ? Prescription.search(@query).ordered : Prescription.ordered).includes(:creator, :updater)
+    @pagy, @prescriptions = pagy(:offset, scope, limit: 8)
   end
 
   def new
