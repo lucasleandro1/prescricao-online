@@ -40,7 +40,7 @@
         placeholder="Buscar prescrição..."
         class="w-full px-5 pr-12 py-3 text-[15px] border-2 border-[#e2e8f0] rounded-xl bg-white text-[#1e293b] outline-none transition-all focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)]"
         data-prescriptions-target="searchInput"
-        data-action="input->prescriptions#search keydown->prescriptions#handleKey"
+        data-action="input->prescriptions#search keydown->prescriptions#handleKey click->prescriptions#openSearch"
         autocomplete="off"
       >
       <button

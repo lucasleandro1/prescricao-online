@@ -110,6 +110,10 @@ export default class extends Controller {
 
   // ─── PRESCRIÇÃO ──────────────────────────────────────────
 
+  openSearch() {
+    this.renderPrescriptionDropdown(this.activePrescriptions)
+  }
+
   search(event) {
     const query = event.target.value.trim().toLowerCase()
     const results = query
