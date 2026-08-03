@@ -6,124 +6,116 @@
 
     <%# Header %>
     <div class="text-center py-2 mb-4">
-      <span class="inline-block text-[9px] font-medium text-[#94a3b8] bg-[#f1f5f9] px-3 py-1 rounded-full uppercase tracking-wide mb-2">
-        Acesso restrito
-      </span>
       <h1 class="text-[26px] font-bold mb-2 tracking-tight bg-gradient-to-br from-blue-500 to-cyan-500 bg-clip-text text-transparent">
-        Arquivo de Prescrições
+        Prescrições
       </h1>
     </div>
 
-    <%# PASSO 1: Seleção de categoria %>
+    <%# Filtro 1: Categoria %>
     <div class="relative mb-2.5">
-      <label class="block text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-1.5 px-1">
-        1. Selecione uma categoria
-      </label>
       <input
         type="text"
-        placeholder="Buscar categoria..."
+        placeholder="Filtrar por categoria..."
         class="w-full px-5 pr-12 py-3 text-[15px] border-2 border-[#e2e8f0] rounded-xl bg-white text-[#1e293b] outline-none transition-all focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)]"
         data-prescriptions-target="categoryInput"
-        data-action="input->prescriptions#searchCategory keydown->prescriptions#handleCategoryKey focus->prescriptions#searchCategory"
+        data-action="input->prescriptions#searchCategory keydown->prescriptions#handleCategoryKey click->prescriptions#openCategory"
         autocomplete="off"
+        readonly
       >
+      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#94a3b8] text-sm pointer-events-none hidden"
+            data-prescriptions-target="categoryLabel"></span>
       <button
-        class="absolute right-4 bottom-3 bg-transparent border-none text-[22px] text-[#94a3b8] cursor-pointer px-2 py-1 rounded-md hover:bg-[#f1f5f9] hover:text-blue-500 transition-all leading-none"
+        class="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent border-none text-[22px] text-[#94a3b8] cursor-pointer px-2 py-1 rounded-md hover:bg-[#f1f5f9] hover:text-blue-500 transition-all leading-none"
         data-action="click->prescriptions#clearCategory"
       >×</button>
-      <div class="absolute top-[calc(100%+4px)] left-0 right-0 bg-white border-2 border-[#e2e8f0] rounded-xl max-h-72 overflow-y-auto shadow-xl z-50 hidden"
+      <div class="absolute top-[calc(100%+6px)] left-0 right-0 bg-white border-2 border-[#e2e8f0] rounded-xl max-h-72 overflow-y-auto shadow-xl z-50 hidden"
            data-prescriptions-target="categoryDropdown">
       </div>
     </div>
 
-    <%# PASSO 2: Seleção de prescrição (aparece após escolher categoria) %>
-    <div class="hidden" data-prescriptions-target="prescriptionSection">
-      <div class="relative mb-2.5">
-        <label class="block text-xs font-semibold text-[#64748b] uppercase tracking-wide mb-1.5 px-1">
-          2. Selecione uma prescrição
-        </label>
-        <input
-          type="text"
-          placeholder="Buscar prescrição..."
-          class="w-full px-5 pr-12 py-3 text-[15px] border-2 border-[#e2e8f0] rounded-xl bg-white text-[#1e293b] outline-none transition-all focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)]"
-          data-prescriptions-target="searchInput"
-          data-action="input->prescriptions#search keydown->prescriptions#handleKey focus->prescriptions#search"
-          autocomplete="off"
-        >
-        <button
-          class="absolute right-4 bottom-3 bg-transparent border-none text-[22px] text-[#94a3b8] cursor-pointer px-2 py-1 rounded-md hover:bg-[#f1f5f9] hover:text-blue-500 transition-all leading-none"
-          data-action="click->prescriptions#clearSearch"
-        >×</button>
-        <div class="absolute top-[calc(100%+4px)] left-0 right-0 bg-white border-2 border-[#e2e8f0] rounded-xl max-h-72 overflow-y-auto shadow-xl z-50 hidden"
-             data-prescriptions-target="dropdown">
-        </div>
-      </div>
-
-      <%# Navegação %>
-      <div class="flex justify-center gap-3 mb-2.5">
-        <button
-          class="px-6 py-2 bg-white border-2 border-[#e2e8f0] rounded-xl cursor-pointer text-base font-medium text-[#64748b] shadow-sm transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-px active:translate-y-0"
-          data-action="click->prescriptions#navigatePrev"
-        >←</button>
-        <button
-          class="px-6 py-2 bg-white border-2 border-[#e2e8f0] rounded-xl cursor-pointer text-base font-medium text-[#64748b] shadow-sm transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-px active:translate-y-0"
-          data-action="click->prescriptions#navigateNext"
-        >→</button>
-      </div>
-
-      <%# Nome da prescrição selecionada %>
-      <div class="text-center font-semibold text-sm mb-2.5 text-blue-500 py-2 bg-[#f1f5f9] rounded-xl"
-           data-prescriptions-target="selectedTitle">
-        Selecione uma prescrição acima
-      </div>
-
-      <%# Conteúdo da prescrição %>
-      <div class="bg-white px-5 py-4 rounded-2xl shadow-md mb-3.5 text-sm leading-relaxed border border-[#f1f5f9] min-h-[60px] whitespace-pre-wrap"
-           data-prescriptions-target="contentBox">
-      </div>
-
-      <%# Alert de copiado %>
-      <div class="hidden bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-3 py-3 rounded-xl text-center mb-3.5 font-medium text-sm shadow-md"
-           data-prescriptions-target="alert">
-        ✓ Copiado para a área de transferência!
-      </div>
-
-      <%# Botão copiar %>
+    <%# Filtro 2: Prescrição %>
+    <div class="relative mb-2.5">
+      <input
+        type="text"
+        placeholder="Buscar prescrição..."
+        class="w-full px-5 pr-12 py-3 text-[15px] border-2 border-[#e2e8f0] rounded-xl bg-white text-[#1e293b] outline-none transition-all focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)]"
+        data-prescriptions-target="searchInput"
+        data-action="input->prescriptions#search keydown->prescriptions#handleKey"
+        autocomplete="off"
+      >
       <button
-        class="block w-full py-3 mb-2 border-none rounded-xl text-sm font-medium cursor-pointer transition-all bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-md hover:shadow-lg hover:-translate-y-px active:scale-[0.98]"
-        data-action="click->prescriptions#copyPrescription"
-      >📋 Copiar prescrição</button>
-
-      <% if user_signed_in? %>
-        <button
-          class="block w-full py-3 mb-2 border-2 border-[#e2e8f0] rounded-xl text-sm font-medium cursor-pointer transition-all bg-white text-[#1e293b] shadow-sm hover:bg-[#f8f9fa] hover:border-blue-500 hover:text-blue-500"
-          data-action="click->prescriptions#addToEditor"
-        >➕ Adicionar ao editor</button>
-
-        <div
-          contenteditable="true"
-          class="bg-white px-5 py-4 border-2 border-[#e2e8f0] rounded-2xl mb-3.5 min-h-[80px] text-sm leading-relaxed shadow-sm transition-all outline-none focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)] whitespace-pre-wrap"
-          data-prescriptions-target="editor"
-        ></div>
-
-        <button
-          class="hidden w-full py-3 mb-2 border-none rounded-xl text-sm font-medium cursor-pointer transition-all bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-md hover:shadow-lg hover:-translate-y-px active:scale-[0.98]"
-          data-prescriptions-target="copyEditedBtn"
-          data-action="click->prescriptions#copyEdited"
-        >📋 Copiar texto editado</button>
-
-        <button
-          class="hidden w-full py-3 mb-2 border-none rounded-xl text-sm font-medium cursor-pointer transition-all bg-gradient-to-br from-red-500 to-red-600 text-white shadow-md hover:shadow-lg hover:-translate-y-px active:scale-[0.98]"
-          data-prescriptions-target="clearEditorBtn"
-          data-action="click->prescriptions#clearEditor"
-        >🗑️ Limpar editor</button>
-      <% else %>
-        <div class="border-2 border-dashed border-[#e2e8f0] rounded-xl py-4 px-5 text-center text-sm text-[#94a3b8] mb-2">
-          <%= link_to "Entrar", new_user_session_path, class: "text-blue-500 font-medium hover:underline" %>
-          para usar o editor e adicionar prescrições
-        </div>
-      <% end %>
+        class="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent border-none text-[22px] text-[#94a3b8] cursor-pointer px-2 py-1 rounded-md hover:bg-[#f1f5f9] hover:text-blue-500 transition-all leading-none"
+        data-action="click->prescriptions#clearSearch"
+      >×</button>
+      <div class="absolute top-[calc(100%+6px)] left-0 right-0 bg-white border-2 border-[#e2e8f0] rounded-xl max-h-72 overflow-y-auto shadow-xl z-50 hidden"
+           data-prescriptions-target="dropdown">
+      </div>
     </div>
+
+    <%# Navegação %>
+    <div class="flex justify-center gap-3 mb-2.5">
+      <button
+        class="px-6 py-2 bg-white border-2 border-[#e2e8f0] rounded-xl cursor-pointer text-base font-medium text-[#64748b] shadow-sm transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-px active:translate-y-0"
+        data-action="click->prescriptions#navigatePrev"
+      >←</button>
+      <button
+        class="px-6 py-2 bg-white border-2 border-[#e2e8f0] rounded-xl cursor-pointer text-base font-medium text-[#64748b] shadow-sm transition-all hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:-translate-y-px active:translate-y-0"
+        data-action="click->prescriptions#navigateNext"
+      >→</button>
+    </div>
+
+    <%# Nome da prescrição selecionada %>
+    <div class="text-center font-semibold text-sm mb-2.5 text-blue-500 py-2 bg-[#f1f5f9] rounded-xl"
+         data-prescriptions-target="selectedTitle">
+      Selecione uma opção para ver a prescrição
+    </div>
+
+    <%# Conteúdo da prescrição %>
+    <div class="bg-white px-5 py-4 rounded-2xl shadow-md mb-3.5 text-sm leading-relaxed border border-[#f1f5f9] min-h-[60px] whitespace-pre-wrap"
+         data-prescriptions-target="contentBox">
+    </div>
+
+    <%# Alert de copiado %>
+    <div class="hidden bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-3 py-3 rounded-xl text-center mb-3.5 font-medium text-sm shadow-md"
+         data-prescriptions-target="alert">
+      ✓ Copiado para a área de transferência!
+    </div>
+
+    <%# Botão copiar %>
+    <button
+      class="block w-full py-3 mb-2 border-none rounded-xl text-sm font-medium cursor-pointer transition-all bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-md hover:shadow-lg hover:-translate-y-px active:scale-[0.98]"
+      data-action="click->prescriptions#copyPrescription"
+    >📋 Copiar prescrição</button>
+
+    <% if user_signed_in? %>
+      <button
+        class="block w-full py-3 mb-2 border-2 border-[#e2e8f0] rounded-xl text-sm font-medium cursor-pointer transition-all bg-white text-[#1e293b] shadow-sm hover:bg-[#f8f9fa] hover:border-blue-500 hover:text-blue-500"
+        data-action="click->prescriptions#addToEditor"
+      >➕ Adicionar ao editor</button>
+
+      <div
+        contenteditable="true"
+        class="bg-white px-5 py-4 border-2 border-[#e2e8f0] rounded-2xl mb-3.5 min-h-[80px] text-sm leading-relaxed shadow-sm transition-all outline-none focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)] whitespace-pre-wrap"
+        data-prescriptions-target="editor"
+      ></div>
+
+      <button
+        class="hidden w-full py-3 mb-2 border-none rounded-xl text-sm font-medium cursor-pointer transition-all bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-md hover:shadow-lg hover:-translate-y-px active:scale-[0.98]"
+        data-prescriptions-target="copyEditedBtn"
+        data-action="click->prescriptions#copyEdited"
+      >📋 Copiar texto editado</button>
+
+      <button
+        class="hidden w-full py-3 mb-2 border-none rounded-xl text-sm font-medium cursor-pointer transition-all bg-gradient-to-br from-red-500 to-red-600 text-white shadow-md hover:shadow-lg hover:-translate-y-px active:scale-[0.98]"
+        data-prescriptions-target="clearEditorBtn"
+        data-action="click->prescriptions#clearEditor"
+      >🗑️ Limpar editor</button>
+    <% else %>
+      <div class="border-2 border-dashed border-[#e2e8f0] rounded-xl py-4 px-5 text-center text-sm text-[#94a3b8] mb-2">
+        <%= link_to "Entrar", new_user_session_path, class: "text-blue-500 font-medium hover:underline" %>
+        para usar o editor e adicionar prescrições
+      </div>
+    <% end %>
 
     <%# Footer %>
     <div class="text-center mt-5 pt-3.5 border-t border-[#e2e8f0]">

@@ -3,7 +3,6 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [
     "categoryInput", "categoryDropdown",
-    "prescriptionSection",
     "searchInput", "dropdown",
     "selectedTitle", "contentBox",
     "alert", "editor", "copyEditedBtn", "clearEditorBtn"
@@ -13,9 +12,8 @@ export default class extends Controller {
   connect() {
     this.allPrescriptions = JSON.parse(this.dataValue)
     this.categories = [...new Set(this.allPrescriptions.map(p => p.category))].sort()
-    this.filteredCategories = [...this.categories]
     this.selectedCategory = null
-    this.filteredPrescriptions = []
+    this.activePrescriptions = [...this.allPrescriptions]
     this.currentIndex = -1
     this.currentPrescription = null
     this.alertTimeout = null
@@ -30,33 +28,34 @@ export default class extends Controller {
 
   // ─── CATEGORIA ───────────────────────────────────────────
 
-  searchCategory(event) {
-    const query = (event?.target?.value || this.categoryInputTarget.value).trim().toLowerCase()
-    this.filteredCategories = query
-      ? this.categories.filter(c => c.toLowerCase().includes(query))
-      : [...this.categories]
-    this.renderCategoryDropdown()
+  openCategory() {
+    this.renderCategoryDropdown(this.categories)
   }
 
-  renderCategoryDropdown() {
+  searchCategory(event) {
+    const query = event.target.value.trim().toLowerCase()
+    const filtered = query
+      ? this.categories.filter(c => c.toLowerCase().includes(query))
+      : [...this.categories]
+    this.renderCategoryDropdown(filtered)
+  }
+
+  renderCategoryDropdown(list) {
     const dropdown = this.categoryDropdownTarget
     dropdown.innerHTML = ""
     this.catHighlightIndex = -1
 
-    if (this.filteredCategories.length === 0) {
+    if (list.length === 0) {
       dropdown.innerHTML = '<div class="px-5 py-3 text-sm text-[#94a3b8]">Nenhuma categoria encontrada</div>'
     } else {
-      this.filteredCategories.forEach((cat, i) => {
-        const item = document.createElement("div")
-        item.className = "px-5 py-3 cursor-pointer border-b border-[#f1f5f9] last:border-b-0 text-sm text-[#1e293b] transition-all"
+      list.forEach((cat, i) => {
         const count = this.allPrescriptions.filter(p => p.category === cat).length
-        item.innerHTML = `<span>${cat}</span> <span class="text-xs text-[#94a3b8] ml-1">(${count})</span>`
+        const item = document.createElement("div")
+        item.className = "px-5 py-3 cursor-pointer border-b border-[#f1f5f9] last:border-b-0 text-sm text-[#1e293b] transition-all flex justify-between items-center"
+        item.innerHTML = `<span>${cat}</span><span class="text-xs text-[#94a3b8]">${count}</span>`
         item.dataset.index = i
         item.addEventListener("click", () => this.selectCategory(cat))
-        item.addEventListener("mouseenter", () => {
-          this.catHighlightIndex = i
-          this.highlightItems(dropdown, i)
-        })
+        item.addEventListener("mouseenter", () => this.highlightItems(dropdown, i))
         dropdown.appendChild(item)
       })
     }
@@ -67,41 +66,29 @@ export default class extends Controller {
     this.selectedCategory = cat
     this.categoryInputTarget.value = cat
     this.categoryDropdownTarget.classList.add("hidden")
-
-    this.filteredPrescriptions = this.allPrescriptions.filter(p => p.category === cat)
+    this.activePrescriptions = this.allPrescriptions.filter(p => p.category === cat)
     this.currentIndex = -1
     this.currentPrescription = null
-
-    if (this.hasSearchInputTarget) {
-      this.searchInputTarget.value = ""
-    }
-    if (this.hasSelectedTitleTarget) {
-      this.selectedTitleTarget.textContent = "Selecione uma prescrição acima"
-    }
-    if (this.hasContentBoxTarget) {
-      this.contentBoxTarget.innerHTML = ""
-    }
-
-    this.prescriptionSectionTarget.classList.remove("hidden")
-    setTimeout(() => this.searchInputTarget?.focus(), 50)
+    // Limpa a busca de prescrição e refiltra
+    this.searchInputTarget.value = ""
+    this.searchInputTarget.focus()
   }
 
   clearCategory() {
-    this.categoryInputTarget.value = ""
     this.selectedCategory = null
-    this.filteredCategories = [...this.categories]
-    this.filteredPrescriptions = []
+    this.categoryInputTarget.value = ""
+    this.activePrescriptions = [...this.allPrescriptions]
     this.currentIndex = -1
     this.currentPrescription = null
-    this.prescriptionSectionTarget.classList.add("hidden")
+    this.searchInputTarget.value = ""
     this.categoryDropdownTarget.classList.add("hidden")
-    this.categoryInputTarget.focus()
   }
 
   handleCategoryKey(event) {
     const dropdown = this.categoryDropdownTarget
     if (dropdown.classList.contains("hidden")) return
     const items = dropdown.querySelectorAll("[data-index]")
+
     if (event.key === "ArrowDown") {
       event.preventDefault()
       this.catHighlightIndex = Math.min(this.catHighlightIndex + 1, items.length - 1)
@@ -112,7 +99,10 @@ export default class extends Controller {
       this.highlightItems(dropdown, this.catHighlightIndex)
     } else if (event.key === "Enter" && this.catHighlightIndex >= 0) {
       event.preventDefault()
-      this.selectCategory(this.filteredCategories[this.catHighlightIndex])
+      const filtered = this.categoryInputTarget.value.trim().toLowerCase()
+        ? this.categories.filter(c => c.toLowerCase().includes(this.categoryInputTarget.value.trim().toLowerCase()))
+        : this.categories
+      if (filtered[this.catHighlightIndex]) this.selectCategory(filtered[this.catHighlightIndex])
     } else if (event.key === "Escape") {
       dropdown.classList.add("hidden")
     }
@@ -121,9 +111,10 @@ export default class extends Controller {
   // ─── PRESCRIÇÃO ──────────────────────────────────────────
 
   search(event) {
-    const query = (event?.target?.value || "").trim().toLowerCase()
-    const pool = this.filteredPrescriptions.length ? this.filteredPrescriptions : []
-    const results = query ? pool.filter(p => p.title.toLowerCase().includes(query)) : pool
+    const query = event.target.value.trim().toLowerCase()
+    const results = query
+      ? this.activePrescriptions.filter(p => p.title.toLowerCase().includes(query))
+      : [...this.activePrescriptions]
     this.renderPrescriptionDropdown(results)
   }
 
@@ -139,13 +130,9 @@ export default class extends Controller {
         const item = document.createElement("div")
         item.className = "px-5 py-3 cursor-pointer border-b border-[#f1f5f9] last:border-b-0 text-sm text-[#1e293b] transition-all"
         item.textContent = p.title
-        item.dataset.id = p.id
         item.dataset.index = i
         item.addEventListener("click", () => this.selectPrescription(p))
-        item.addEventListener("mouseenter", () => {
-          this.prescHighlightIndex = i
-          this.highlightItems(dropdown, i)
-        })
+        item.addEventListener("mouseenter", () => this.highlightItems(dropdown, i))
         dropdown.appendChild(item)
       })
     }
@@ -154,7 +141,7 @@ export default class extends Controller {
 
   selectPrescription(p) {
     this.currentPrescription = p
-    this.currentIndex = this.filteredPrescriptions.findIndex(x => x.id === p.id)
+    this.currentIndex = this.activePrescriptions.findIndex(x => x.id === p.id)
     this.searchInputTarget.value = p.title
     this.dropdownTarget.classList.add("hidden")
     this.showPrescription(p)
@@ -170,6 +157,7 @@ export default class extends Controller {
     const dropdown = this.dropdownTarget
     if (dropdown.classList.contains("hidden")) return
     const items = dropdown.querySelectorAll("[data-index]")
+
     if (event.key === "ArrowDown") {
       event.preventDefault()
       this.prescHighlightIndex = Math.min(this.prescHighlightIndex + 1, items.length - 1)
@@ -180,9 +168,10 @@ export default class extends Controller {
       this.highlightItems(dropdown, this.prescHighlightIndex)
     } else if (event.key === "Enter" && this.prescHighlightIndex >= 0) {
       event.preventDefault()
-      const visible = this.filteredPrescriptions.filter(p =>
-        p.title.toLowerCase().includes(this.searchInputTarget.value.trim().toLowerCase())
-      )
+      const query = this.searchInputTarget.value.trim().toLowerCase()
+      const visible = query
+        ? this.activePrescriptions.filter(p => p.title.toLowerCase().includes(query))
+        : this.activePrescriptions
       if (visible[this.prescHighlightIndex]) this.selectPrescription(visible[this.prescHighlightIndex])
     } else if (event.key === "Escape") {
       dropdown.classList.add("hidden")
@@ -190,17 +179,17 @@ export default class extends Controller {
   }
 
   navigateNext() {
-    if (!this.filteredPrescriptions.length) return
-    this.currentIndex = (this.currentIndex + 1) % this.filteredPrescriptions.length
-    const p = this.filteredPrescriptions[this.currentIndex]
+    if (!this.activePrescriptions.length) return
+    this.currentIndex = (this.currentIndex + 1) % this.activePrescriptions.length
+    const p = this.activePrescriptions[this.currentIndex]
     this.searchInputTarget.value = p.title
     this.showPrescription(p)
   }
 
   navigatePrev() {
-    if (!this.filteredPrescriptions.length) return
-    this.currentIndex = (this.currentIndex - 1 + this.filteredPrescriptions.length) % this.filteredPrescriptions.length
-    const p = this.filteredPrescriptions[this.currentIndex]
+    if (!this.activePrescriptions.length) return
+    this.currentIndex = (this.currentIndex - 1 + this.activePrescriptions.length) % this.activePrescriptions.length
+    const p = this.activePrescriptions[this.currentIndex]
     this.searchInputTarget.value = p.title
     this.showPrescription(p)
   }
@@ -264,8 +253,8 @@ export default class extends Controller {
 
   handleOutsideClick(e) {
     if (!this.element.contains(e.target)) {
-      this.categoryDropdownTarget?.classList.add("hidden")
-      this.dropdownTarget?.classList.add("hidden")
+      this.categoryDropdownTarget.classList.add("hidden")
+      this.dropdownTarget.classList.add("hidden")
     }
   }
 
