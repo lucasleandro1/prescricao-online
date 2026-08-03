@@ -36,7 +36,9 @@ class Admin::PrescriptionsController < ApplicationController
   end
 
   def destroy
-    authorize_admin!
+    unless current_user.admin?
+      return redirect_to admin_prescriptions_path, alert: "Apenas administradores podem deletar prescrições."
+    end
     @prescription.destroy
     redirect_to admin_prescriptions_path, notice: "Prescrição deletada com sucesso!"
   end
@@ -49,11 +51,5 @@ class Admin::PrescriptionsController < ApplicationController
 
   def prescription_params
     params.require(:prescription).permit(:title, :content, :category, :position)
-  end
-
-  def authorize_admin!
-    unless current_user.admin?
-      redirect_to admin_prescriptions_path, alert: "Apenas administradores podem deletar prescrições."
-    end
   end
 end

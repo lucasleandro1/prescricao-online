@@ -7,7 +7,7 @@ class Prescription < ApplicationRecord
 
   before_save :set_category
 
-  scope :ordered, -> { order(:position, :title) }
+  scope :ordered, -> { order(Arel.sql("position ASC NULLS LAST, title ASC")) }
   scope :search, ->(query) { where("title LIKE ? OR category LIKE ?", "%#{query}%", "%#{query}%") }
 
   private
