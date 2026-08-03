@@ -2,14 +2,14 @@ require "json"
 require "cgi"
 
 puts "Criando usuário admin..."
-admin = User.find_or_create_by!(email: "admin@prescricao.com") do |u|
-  u.name = "Administrador"
-  u.password = "Admin@123456"
-  u.password_confirmation = "Admin@123456"
+admin = User.find_or_create_by!(email: "livia@prescricao.com") do |u|
+  u.name = "Livia"
+  u.password = "livia@123456"
+  u.password_confirmation = "livia@123456"
   u.role = "admin"
 end
-admin.update!(role: "admin", name: "Administrador") if admin.name.blank?
-puts "Admin criado: admin@prescricao.com / Admin@123456"
+admin.update!(role: "admin", name: "Livia") if admin.name.blank?
+puts "Admin criado: livia@prescricao.com / livia@123456"
 
 puts "Importando prescrições..."
 data_file = Rails.root.join("db", "prescricoes_seed.json").to_s

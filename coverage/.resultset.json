@@ -1,0 +1,234 @@
+{
+  "RSpec": {
+    "coverage": {
+      "/home/lucas/projects/prescricao_online/app/controllers/admin/prescriptions_controller.rb": {
+        "lines": [
+          1,
+          1,
+          1,
+          null,
+          1,
+          null,
+          1,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          null,
+          null,
+          1,
+          1,
+          null,
+          null,
+          1,
+          2,
+          2,
+          2,
+          2,
+          1,
+          null,
+          1,
+          null,
+          null,
+          null,
+          1,
+          null,
+          null,
+          1,
+          2,
+          2,
+          1,
+          null,
+          1,
+          null,
+          null,
+          null,
+          1,
+          2,
+          1,
+          null,
+          1,
+          1,
+          null,
+          null,
+          1,
+          null,
+          1,
+          5,
+          null,
+          null,
+          1,
+          4,
+          null,
+          null
+        ]
+      },
+      "/home/lucas/projects/prescricao_online/app/controllers/admin/users_controller.rb": {
+        "lines": [
+          1,
+          1,
+          1,
+          1,
+          null,
+          1,
+          1,
+          null,
+          null,
+          1,
+          1,
+          null,
+          null,
+          1,
+          2,
+          2,
+          1,
+          null,
+          1,
+          null,
+          null,
+          null,
+          1,
+          null,
+          null,
+          1,
+          4,
+          4,
+          4,
+          3,
+          null,
+          1,
+          null,
+          null,
+          null,
+          1,
+          2,
+          1,
+          null,
+          1,
+          1,
+          null,
+          null,
+          null,
+          1,
+          null,
+          1,
+          7,
+          null,
+          null,
+          1,
+          6,
+          null,
+          null,
+          1,
+          12,
+          1,
+          null,
+          null,
+          null
+        ]
+      },
+      "/home/lucas/projects/prescricao_online/app/controllers/application_controller.rb": {
+        "lines": [
+          1,
+          1,
+          null,
+          1,
+          null,
+          1,
+          null,
+          1,
+          2,
+          2,
+          null,
+          null
+        ]
+      },
+      "/home/lucas/projects/prescricao_online/app/controllers/prescriptions_controller.rb": {
+        "lines": [
+          1,
+          1,
+          2,
+          2,
+          3,
+          null,
+          null,
+          null
+        ]
+      },
+      "/home/lucas/projects/prescricao_online/app/helpers/admin/prescriptions_helper.rb": {
+        "lines": [
+          1,
+          null
+        ]
+      },
+      "/home/lucas/projects/prescricao_online/app/helpers/application_helper.rb": {
+        "lines": [
+          1,
+          null
+        ]
+      },
+      "/home/lucas/projects/prescricao_online/app/helpers/prescriptions_helper.rb": {
+        "lines": [
+          1,
+          null
+        ]
+      },
+      "/home/lucas/projects/prescricao_online/app/models/application_record.rb": {
+        "lines": [
+          1,
+          1,
+          null
+        ]
+      },
+      "/home/lucas/projects/prescricao_online/app/models/prescription.rb": {
+        "lines": [
+          1,
+          1,
+          1,
+          null,
+          1,
+          1,
+          null,
+          1,
+          null,
+          6,
+          7,
+          null,
+          1,
+          null,
+          1,
+          29,
+          null,
+          null
+        ]
+      },
+      "/home/lucas/projects/prescricao_online/app/models/user.rb": {
+        "lines": [
+          1,
+          1,
+          null,
+          null,
+          1,
+          1,
+          null,
+          1,
+          null,
+          1,
+          1,
+          null,
+          1,
+          21,
+          null,
+          null
+        ]
+      }
+    },
+    "timestamp": 1785800130
+  },
+  "Unknown Test Framework": {
+    "coverage": {},
+    "timestamp": 1785799236
+  }
+}

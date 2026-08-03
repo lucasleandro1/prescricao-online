@@ -2,10 +2,15 @@ class Admin::PrescriptionsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_prescription, only: [ :edit, :update, :destroy ]
 
+  PER_PAGE = 8
+
   def index
-    @query = params[:q]
-    scope = (@query.present? ? Prescription.search(@query).ordered : Prescription.ordered).includes(:creator, :updater)
-    @pagy, @prescriptions = pagy(:offset, scope, limit: 8)
+    @query  = params[:q]
+    scope   = (@query.present? ? Prescription.search(@query).ordered : Prescription.ordered).includes(:creator, :updater)
+    @total  = scope.count
+    @page   = [[params[:page].to_i, 1].max, [(@total.to_f / PER_PAGE).ceil, 1].max].min
+    @total_pages = [(@total.to_f / PER_PAGE).ceil, 1].max
+    @prescriptions = scope.offset((@page - 1) * PER_PAGE).limit(PER_PAGE)
   end
 
   def new
