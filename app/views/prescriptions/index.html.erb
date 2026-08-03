@@ -1,6 +1,7 @@
 <div class="min-h-screen py-4 px-4"
      data-controller="prescriptions"
-     data-prescriptions-data-value="<%= html_escape(@prescriptions_json) %>">
+     data-prescriptions-data-value="<%= html_escape(@prescriptions_json) %>"
+     data-prescriptions-authenticated-value="<%= user_signed_in? %>">
 
   <div class="max-w-[860px] mx-auto">
 
@@ -63,35 +64,44 @@
       ✓ Copiado para a área de transferência!
     </div>
 
-    <%# Botões de ação %>
+    <%# Botão copiar (sempre visível) %>
     <button
       class="block w-full py-3 mb-2 border-none rounded-xl text-sm font-medium cursor-pointer transition-all bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-md hover:shadow-lg hover:-translate-y-px active:scale-[0.98]"
       data-action="click->prescriptions#copyPrescription"
     >📋 Copiar prescrição</button>
 
-    <button
-      class="block w-full py-3 mb-2 border-2 border-[#e2e8f0] rounded-xl text-sm font-medium cursor-pointer transition-all bg-white text-[#1e293b] shadow-sm hover:bg-[#f8f9fa] hover:border-blue-500 hover:text-blue-500"
-      data-action="click->prescriptions#addToEditor"
-    >➕ Adicionar ao editor</button>
+    <% if user_signed_in? %>
+      <%# Botão adicionar ao editor (apenas logados) %>
+      <button
+        class="block w-full py-3 mb-2 border-2 border-[#e2e8f0] rounded-xl text-sm font-medium cursor-pointer transition-all bg-white text-[#1e293b] shadow-sm hover:bg-[#f8f9fa] hover:border-blue-500 hover:text-blue-500"
+        data-action="click->prescriptions#addToEditor"
+      >➕ Adicionar ao editor</button>
 
-    <%# Editor %>
-    <div
-      contenteditable="true"
-      class="bg-white px-5 py-4 border-2 border-[#e2e8f0] rounded-2xl mb-3.5 min-h-[80px] text-sm leading-relaxed shadow-sm transition-all outline-none focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)] whitespace-pre-wrap"
-      data-prescriptions-target="editor"
-    ></div>
+      <%# Editor %>
+      <div
+        contenteditable="true"
+        class="bg-white px-5 py-4 border-2 border-[#e2e8f0] rounded-2xl mb-3.5 min-h-[80px] text-sm leading-relaxed shadow-sm transition-all outline-none focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)] whitespace-pre-wrap"
+        data-prescriptions-target="editor"
+      ></div>
 
-    <button
-      class="hidden w-full py-3 mb-2 border-none rounded-xl text-sm font-medium cursor-pointer transition-all bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-md hover:shadow-lg hover:-translate-y-px active:scale-[0.98]"
-      data-prescriptions-target="copyEditedBtn"
-      data-action="click->prescriptions#copyEdited"
-    >📋 Copiar texto editado</button>
+      <button
+        class="hidden w-full py-3 mb-2 border-none rounded-xl text-sm font-medium cursor-pointer transition-all bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-md hover:shadow-lg hover:-translate-y-px active:scale-[0.98]"
+        data-prescriptions-target="copyEditedBtn"
+        data-action="click->prescriptions#copyEdited"
+      >📋 Copiar texto editado</button>
 
-    <button
-      class="hidden w-full py-3 mb-2 border-none rounded-xl text-sm font-medium cursor-pointer transition-all bg-gradient-to-br from-red-500 to-red-600 text-white shadow-md hover:shadow-lg hover:-translate-y-px active:scale-[0.98]"
-      data-prescriptions-target="clearEditorBtn"
-      data-action="click->prescriptions#clearEditor"
-    >🗑️ Limpar editor</button>
+      <button
+        class="hidden w-full py-3 mb-2 border-none rounded-xl text-sm font-medium cursor-pointer transition-all bg-gradient-to-br from-red-500 to-red-600 text-white shadow-md hover:shadow-lg hover:-translate-y-px active:scale-[0.98]"
+        data-prescriptions-target="clearEditorBtn"
+        data-action="click->prescriptions#clearEditor"
+      >🗑️ Limpar editor</button>
+    <% else %>
+      <%# CTA para login %>
+      <div class="border-2 border-dashed border-[#e2e8f0] rounded-xl py-4 px-5 text-center text-sm text-[#94a3b8] mb-2">
+        <%= link_to "Entrar", new_user_session_path, class: "text-blue-500 font-medium hover:underline" %>
+        para usar o editor e adicionar prescrições
+      </div>
+    <% end %>
 
     <%# Footer %>
     <div class="text-center mt-5 pt-3.5 border-t border-[#e2e8f0]">
@@ -106,7 +116,6 @@
       <% else %>
         <%= link_to "Admin", new_user_session_path, class: "text-xs text-[#e2e8f0] hover:text-[#94a3b8] transition-colors" %>
       <% end %>
-      <p class="text-[10px] text-[#cbd5e1] mt-2">Dr. Livia Moreira · Direitos reservados ©</p>
     </div>
 
   </div>

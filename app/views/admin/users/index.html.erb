@@ -1,0 +1,67 @@
+<div class="min-h-screen bg-[#fafbfc] py-8 px-4">
+  <div class="max-w-3xl mx-auto">
+
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold bg-gradient-to-br from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+          Usuários
+        </h1>
+        <p class="text-sm text-[#64748b] mt-1"><%= User.count %> usuário(s) cadastrado(s)</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <%= link_to "← Prescrições", admin_prescriptions_path, class: "text-sm text-[#64748b] hover:text-blue-500 transition-colors" %>
+        <%= link_to "＋ Novo Usuário", new_admin_user_path, class: "px-4 py-2 bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-xl text-sm font-medium shadow-md hover:shadow-lg hover:-translate-y-px transition-all" %>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-md border border-[#f1f5f9] overflow-hidden">
+      <% if @users.any? %>
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-[#f1f5f9] bg-[#fafbfc]">
+              <th class="text-left px-5 py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Nome</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">E-mail</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Perfil</th>
+              <th class="text-right px-5 py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @users.each do |user| %>
+              <tr class="border-b border-[#f1f5f9] hover:bg-[#fafbfc] transition-colors">
+                <td class="px-5 py-3 text-sm font-medium text-[#1e293b]">
+                  <%= user.name %>
+                  <% if user == current_user %>
+                    <span class="ml-1 text-[10px] text-[#94a3b8]">(você)</span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-3 text-sm text-[#64748b]"><%= user.email %></td>
+                <td class="px-5 py-3">
+                  <span class="inline-block px-2 py-0.5 text-xs rounded-full font-medium <%= user.admin? ? 'bg-purple-100 text-purple-700' : 'bg-blue-50 text-blue-600' %>">
+                    <%= user.admin? ? "Admin" : "Usuário" %>
+                  </span>
+                </td>
+                <td class="px-5 py-3 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <%= link_to "Editar", edit_admin_user_path(user),
+                        class: "px-3 py-1.5 text-xs border border-[#e2e8f0] rounded-lg text-[#64748b] hover:border-blue-300 hover:text-blue-500 transition-all" %>
+                    <% if user != current_user %>
+                      <%= button_to "Remover", admin_user_path(user), method: :delete,
+                          data: { turbo_confirm: "Tem certeza que deseja remover #{user.name}?" },
+                          class: "px-3 py-1.5 text-xs border border-[#e2e8f0] rounded-lg text-[#64748b] hover:border-red-300 hover:text-red-500 transition-all cursor-pointer bg-transparent" %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <div class="py-16 text-center text-[#94a3b8]">
+          <p class="text-lg mb-2">Nenhum usuário cadastrado</p>
+          <%= link_to "Criar primeiro usuário", new_admin_user_path, class: "text-blue-500 hover:underline" %>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+</div>

@@ -2,10 +2,13 @@ require "json"
 require "cgi"
 
 puts "Criando usuário admin..."
-User.find_or_create_by!(email: "admin@prescricao.com") do |u|
+admin = User.find_or_create_by!(email: "admin@prescricao.com") do |u|
+  u.name = "Administrador"
   u.password = "Admin@123456"
   u.password_confirmation = "Admin@123456"
+  u.role = "admin"
 end
+admin.update!(role: "admin", name: "Administrador") if admin.name.blank?
 puts "Admin criado: admin@prescricao.com / Admin@123456"
 
 puts "Importando prescrições..."

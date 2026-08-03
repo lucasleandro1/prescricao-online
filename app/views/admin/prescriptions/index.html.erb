@@ -11,6 +11,9 @@
       <div class="flex items-center gap-3">
         <%= link_to "← Voltar ao site", root_path, class: "text-sm text-[#64748b] hover:text-blue-500 transition-colors" %>
         <%= link_to "＋ Nova Prescrição", new_admin_prescription_path, class: "px-4 py-2 bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-xl text-sm font-medium shadow-md hover:shadow-lg hover:-translate-y-px transition-all" %>
+        <% if current_user.admin? %>
+          <%= link_to "👥 Usuários", admin_users_path, class: "px-4 py-2 border-2 border-[#e2e8f0] rounded-xl text-sm text-[#64748b] hover:border-blue-300 hover:text-blue-500 transition-all" %>
+        <% end %>
         <%= link_to "Sair", destroy_user_session_path, data: { turbo_method: :delete }, class: "px-4 py-2 border-2 border-[#e2e8f0] rounded-xl text-sm text-[#64748b] hover:border-red-300 hover:text-red-500 transition-all" %>
       </div>
     </div>
@@ -32,13 +35,14 @@
             <tr class="border-b border-[#f1f5f9] bg-[#fafbfc]">
               <th class="text-left px-5 py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Título</th>
               <th class="text-left px-5 py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Categoria</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Auditoria</th>
               <th class="text-right px-5 py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Ações</th>
             </tr>
           </thead>
           <tbody>
             <% @prescriptions.each do |p| %>
               <tr class="border-b border-[#f1f5f9] hover:bg-[#fafbfc] transition-colors">
-                <td class="px-5 py-3 text-sm text-[#1e293b] max-w-md">
+                <td class="px-5 py-3 text-sm text-[#1e293b] max-w-xs">
                   <span class="line-clamp-2"><%= p.title %></span>
                 </td>
                 <td class="px-5 py-3">
@@ -46,13 +50,23 @@
                     <%= p.category %>
                   </span>
                 </td>
+                <td class="px-5 py-3 text-xs text-[#94a3b8] space-y-0.5">
+                  <% if p.creator %>
+                    <div>✏️ Criado por <span class="font-medium text-[#64748b]"><%= p.creator.name %></span></div>
+                  <% end %>
+                  <% if p.updater && p.updater != p.creator %>
+                    <div>🔄 Editado por <span class="font-medium text-[#64748b]"><%= p.updater.name %></span></div>
+                  <% end %>
+                </td>
                 <td class="px-5 py-3 text-right">
                   <div class="flex items-center justify-end gap-2">
                     <%= link_to "Editar", edit_admin_prescription_path(p),
                         class: "px-3 py-1.5 text-xs border border-[#e2e8f0] rounded-lg text-[#64748b] hover:border-blue-300 hover:text-blue-500 transition-all" %>
-                    <%= button_to "Deletar", admin_prescription_path(p), method: :delete,
-                        data: { turbo_confirm: "Tem certeza que deseja deletar \"#{p.title}\"?" },
-                        class: "px-3 py-1.5 text-xs border border-[#e2e8f0] rounded-lg text-[#64748b] hover:border-red-300 hover:text-red-500 transition-all cursor-pointer bg-transparent" %>
+                    <% if current_user.admin? %>
+                      <%= button_to "Deletar", admin_prescription_path(p), method: :delete,
+                          data: { turbo_confirm: "Tem certeza que deseja deletar \"#{p.title}\"?" },
+                          class: "px-3 py-1.5 text-xs border border-[#e2e8f0] rounded-lg text-[#64748b] hover:border-red-300 hover:text-red-500 transition-all cursor-pointer bg-transparent" %>
+                    <% end %>
                   </div>
                 </td>
               </tr>
