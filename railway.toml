@@ -1,0 +1,8 @@
+[build]
+builder = "nixpacks"
+buildCommand = "bundle install && bundle exec rails tailwindcss:build && bundle exec rails assets:precompile && bundle exec rails assets:clean"
+
+[deploy]
+startCommand = "bundle exec rails db:migrate && bundle exec rails db:seed && bundle exec rails server -p $PORT -e $RAILS_ENV"
+healthcheckPath = "/up"
+restartPolicyType = "on_failure"
