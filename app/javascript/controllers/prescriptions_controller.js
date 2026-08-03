@@ -2,59 +2,60 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = [
-    "searchInput", "dropdown", "selectedTitle", "contentBox",
+    "categoryInput", "categoryDropdown",
+    "prescriptionSection",
+    "searchInput", "dropdown",
+    "selectedTitle", "contentBox",
     "alert", "editor", "copyEditedBtn", "clearEditorBtn"
   ]
   static values = { data: String }
 
   connect() {
     this.allPrescriptions = JSON.parse(this.dataValue)
-    this.filteredPrescriptions = [...this.allPrescriptions]
+    this.categories = [...new Set(this.allPrescriptions.map(p => p.category))].sort()
+    this.filteredCategories = [...this.categories]
+    this.selectedCategory = null
+    this.filteredPrescriptions = []
     this.currentIndex = -1
-    this.highlightedIndex = -1
     this.currentPrescription = null
     this.alertTimeout = null
+    this.catHighlightIndex = -1
+    this.prescHighlightIndex = -1
 
-    this.editorTarget.addEventListener("input", () => this.onEditorChange())
+    if (this.hasEditorTarget) {
+      this.editorTarget.addEventListener("input", () => this.onEditorChange())
+    }
     document.addEventListener("click", (e) => this.handleOutsideClick(e))
   }
 
-  search(event) {
-    const query = event.target.value.trim().toLowerCase()
-    if (!query) {
-      this.filteredPrescriptions = [...this.allPrescriptions]
-      this.closeDropdown()
-      return
-    }
-    this.filteredPrescriptions = this.allPrescriptions.filter(p =>
-      p.title.toLowerCase().includes(query)
-    )
-    this.renderDropdown()
+  // ─── CATEGORIA ───────────────────────────────────────────
+
+  searchCategory(event) {
+    const query = (event?.target?.value || this.categoryInputTarget.value).trim().toLowerCase()
+    this.filteredCategories = query
+      ? this.categories.filter(c => c.toLowerCase().includes(query))
+      : [...this.categories]
+    this.renderCategoryDropdown()
   }
 
-  renderDropdown() {
-    const dropdown = this.dropdownTarget
+  renderCategoryDropdown() {
+    const dropdown = this.categoryDropdownTarget
     dropdown.innerHTML = ""
-    this.highlightedIndex = -1
+    this.catHighlightIndex = -1
 
-    if (this.filteredPrescriptions.length === 0) {
-      dropdown.innerHTML = '<div class="px-5 py-3 text-sm text-[#94a3b8]">Nenhuma prescrição encontrada</div>'
+    if (this.filteredCategories.length === 0) {
+      dropdown.innerHTML = '<div class="px-5 py-3 text-sm text-[#94a3b8]">Nenhuma categoria encontrada</div>'
     } else {
-      this.filteredPrescriptions.slice(0, 100).forEach((p, i) => {
+      this.filteredCategories.forEach((cat, i) => {
         const item = document.createElement("div")
-        item.className = "px-5 py-3 cursor-pointer transition-all border-b border-[#f1f5f9] last:border-b-0 text-sm text-[#1e293b] hover:text-blue-500"
-        item.style.cssText = "hover:background:linear-gradient(135deg,rgba(59,130,246,.05),rgba(6,182,212,.05))"
-        item.textContent = p.title
+        item.className = "px-5 py-3 cursor-pointer border-b border-[#f1f5f9] last:border-b-0 text-sm text-[#1e293b] transition-all"
+        const count = this.allPrescriptions.filter(p => p.category === cat).length
+        item.innerHTML = `<span>${cat}</span> <span class="text-xs text-[#94a3b8] ml-1">(${count})</span>`
         item.dataset.index = i
-        item.addEventListener("click", () => this.selectFromDropdown(i))
+        item.addEventListener("click", () => this.selectCategory(cat))
         item.addEventListener("mouseenter", () => {
-          item.style.background = "linear-gradient(135deg, rgba(59,130,246,0.05) 0%, rgba(6,182,212,0.05) 100%)"
-          item.style.color = "#3b82f6"
-          this.highlightedIndex = i
-        })
-        item.addEventListener("mouseleave", () => {
-          item.style.background = ""
-          item.style.color = ""
+          this.catHighlightIndex = i
+          this.highlightItems(dropdown, i)
         })
         dropdown.appendChild(item)
       })
@@ -62,40 +63,196 @@ export default class extends Controller {
     dropdown.classList.remove("hidden")
   }
 
-  closeDropdown() {
-    this.dropdownTarget.classList.add("hidden")
+  selectCategory(cat) {
+    this.selectedCategory = cat
+    this.categoryInputTarget.value = cat
+    this.categoryDropdownTarget.classList.add("hidden")
+
+    this.filteredPrescriptions = this.allPrescriptions.filter(p => p.category === cat)
+    this.currentIndex = -1
+    this.currentPrescription = null
+
+    if (this.hasSearchInputTarget) {
+      this.searchInputTarget.value = ""
+    }
+    if (this.hasSelectedTitleTarget) {
+      this.selectedTitleTarget.textContent = "Selecione uma prescrição acima"
+    }
+    if (this.hasContentBoxTarget) {
+      this.contentBoxTarget.innerHTML = ""
+    }
+
+    this.prescriptionSectionTarget.classList.remove("hidden")
+    setTimeout(() => this.searchInputTarget?.focus(), 50)
   }
 
-  handleOutsideClick(e) {
-    if (!this.element.contains(e.target)) {
-      this.closeDropdown()
+  clearCategory() {
+    this.categoryInputTarget.value = ""
+    this.selectedCategory = null
+    this.filteredCategories = [...this.categories]
+    this.filteredPrescriptions = []
+    this.currentIndex = -1
+    this.currentPrescription = null
+    this.prescriptionSectionTarget.classList.add("hidden")
+    this.categoryDropdownTarget.classList.add("hidden")
+    this.categoryInputTarget.focus()
+  }
+
+  handleCategoryKey(event) {
+    const dropdown = this.categoryDropdownTarget
+    if (dropdown.classList.contains("hidden")) return
+    const items = dropdown.querySelectorAll("[data-index]")
+    if (event.key === "ArrowDown") {
+      event.preventDefault()
+      this.catHighlightIndex = Math.min(this.catHighlightIndex + 1, items.length - 1)
+      this.highlightItems(dropdown, this.catHighlightIndex)
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault()
+      this.catHighlightIndex = Math.max(this.catHighlightIndex - 1, 0)
+      this.highlightItems(dropdown, this.catHighlightIndex)
+    } else if (event.key === "Enter" && this.catHighlightIndex >= 0) {
+      event.preventDefault()
+      this.selectCategory(this.filteredCategories[this.catHighlightIndex])
+    } else if (event.key === "Escape") {
+      dropdown.classList.add("hidden")
     }
+  }
+
+  // ─── PRESCRIÇÃO ──────────────────────────────────────────
+
+  search(event) {
+    const query = (event?.target?.value || "").trim().toLowerCase()
+    const pool = this.filteredPrescriptions.length ? this.filteredPrescriptions : []
+    const results = query ? pool.filter(p => p.title.toLowerCase().includes(query)) : pool
+    this.renderPrescriptionDropdown(results)
+  }
+
+  renderPrescriptionDropdown(list) {
+    const dropdown = this.dropdownTarget
+    dropdown.innerHTML = ""
+    this.prescHighlightIndex = -1
+
+    if (list.length === 0) {
+      dropdown.innerHTML = '<div class="px-5 py-3 text-sm text-[#94a3b8]">Nenhuma prescrição encontrada</div>'
+    } else {
+      list.slice(0, 100).forEach((p, i) => {
+        const item = document.createElement("div")
+        item.className = "px-5 py-3 cursor-pointer border-b border-[#f1f5f9] last:border-b-0 text-sm text-[#1e293b] transition-all"
+        item.textContent = p.title
+        item.dataset.id = p.id
+        item.dataset.index = i
+        item.addEventListener("click", () => this.selectPrescription(p))
+        item.addEventListener("mouseenter", () => {
+          this.prescHighlightIndex = i
+          this.highlightItems(dropdown, i)
+        })
+        dropdown.appendChild(item)
+      })
+    }
+    dropdown.classList.remove("hidden")
+  }
+
+  selectPrescription(p) {
+    this.currentPrescription = p
+    this.currentIndex = this.filteredPrescriptions.findIndex(x => x.id === p.id)
+    this.searchInputTarget.value = p.title
+    this.dropdownTarget.classList.add("hidden")
+    this.showPrescription(p)
+  }
+
+  clearSearch() {
+    this.searchInputTarget.value = ""
+    this.dropdownTarget.classList.add("hidden")
+    this.searchInputTarget.focus()
   }
 
   handleKey(event) {
-    if (!this.dropdownTarget.classList.contains("hidden")) {
-      const items = this.dropdownTarget.querySelectorAll("[data-index]")
-      if (event.key === "ArrowDown") {
-        event.preventDefault()
-        this.highlightedIndex = Math.min(this.highlightedIndex + 1, items.length - 1)
-        this.updateDropdownHighlight(items)
-      } else if (event.key === "ArrowUp") {
-        event.preventDefault()
-        this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0)
-        this.updateDropdownHighlight(items)
-      } else if (event.key === "Enter" && this.highlightedIndex >= 0) {
-        event.preventDefault()
-        this.selectFromDropdown(this.highlightedIndex)
-      } else if (event.key === "Escape") {
-        this.closeDropdown()
-      }
+    const dropdown = this.dropdownTarget
+    if (dropdown.classList.contains("hidden")) return
+    const items = dropdown.querySelectorAll("[data-index]")
+    if (event.key === "ArrowDown") {
+      event.preventDefault()
+      this.prescHighlightIndex = Math.min(this.prescHighlightIndex + 1, items.length - 1)
+      this.highlightItems(dropdown, this.prescHighlightIndex)
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault()
+      this.prescHighlightIndex = Math.max(this.prescHighlightIndex - 1, 0)
+      this.highlightItems(dropdown, this.prescHighlightIndex)
+    } else if (event.key === "Enter" && this.prescHighlightIndex >= 0) {
+      event.preventDefault()
+      const visible = this.filteredPrescriptions.filter(p =>
+        p.title.toLowerCase().includes(this.searchInputTarget.value.trim().toLowerCase())
+      )
+      if (visible[this.prescHighlightIndex]) this.selectPrescription(visible[this.prescHighlightIndex])
+    } else if (event.key === "Escape") {
+      dropdown.classList.add("hidden")
     }
   }
 
-  updateDropdownHighlight(items) {
-    items.forEach((item, i) => {
-      if (i === this.highlightedIndex) {
-        item.style.background = "linear-gradient(135deg, rgba(59,130,246,0.05) 0%, rgba(6,182,212,0.05) 100%)"
+  navigateNext() {
+    if (!this.filteredPrescriptions.length) return
+    this.currentIndex = (this.currentIndex + 1) % this.filteredPrescriptions.length
+    const p = this.filteredPrescriptions[this.currentIndex]
+    this.searchInputTarget.value = p.title
+    this.showPrescription(p)
+  }
+
+  navigatePrev() {
+    if (!this.filteredPrescriptions.length) return
+    this.currentIndex = (this.currentIndex - 1 + this.filteredPrescriptions.length) % this.filteredPrescriptions.length
+    const p = this.filteredPrescriptions[this.currentIndex]
+    this.searchInputTarget.value = p.title
+    this.showPrescription(p)
+  }
+
+  showPrescription(p) {
+    this.currentPrescription = p
+    this.selectedTitleTarget.textContent = p.title
+    this.contentBoxTarget.innerHTML = p.content
+  }
+
+  // ─── CLIPBOARD / EDITOR ──────────────────────────────────
+
+  copyPrescription() {
+    if (!this.currentPrescription) return
+    navigator.clipboard.writeText(this.contentBoxTarget.innerText).then(() => this.showAlert())
+  }
+
+  addToEditor() {
+    if (!this.currentPrescription || !this.hasEditorTarget) return
+    const text = this.contentBoxTarget.innerText
+    const current = this.editorTarget.innerText.trim()
+    this.editorTarget.innerText = current ? current + "\n\n" + text : text
+    this.updateEditorButtons()
+    this.showAlert("✓ Adicionado ao editor!")
+  }
+
+  copyEdited() {
+    if (!this.hasEditorTarget) return
+    navigator.clipboard.writeText(this.editorTarget.innerText).then(() => this.showAlert())
+  }
+
+  clearEditor() {
+    if (!this.hasEditorTarget) return
+    this.editorTarget.innerText = ""
+    this.updateEditorButtons()
+  }
+
+  onEditorChange() { this.updateEditorButtons() }
+
+  updateEditorButtons() {
+    if (!this.hasEditorTarget) return
+    const hasContent = this.editorTarget.innerText.trim().length > 0
+    this.copyEditedBtnTarget.classList.toggle("hidden", !hasContent)
+    this.clearEditorBtnTarget.classList.toggle("hidden", !hasContent)
+  }
+
+  // ─── UTILITÁRIOS ─────────────────────────────────────────
+
+  highlightItems(dropdown, activeIndex) {
+    dropdown.querySelectorAll("[data-index]").forEach((item, i) => {
+      if (i === activeIndex) {
+        item.style.background = "linear-gradient(135deg, rgba(59,130,246,0.06), rgba(6,182,212,0.06))"
         item.style.color = "#3b82f6"
         item.scrollIntoView({ block: "nearest" })
       } else {
@@ -105,77 +262,11 @@ export default class extends Controller {
     })
   }
 
-  selectFromDropdown(index) {
-    const selected = this.filteredPrescriptions[index]
-    if (!selected) return
-    const globalIndex = this.allPrescriptions.findIndex(p => p.id === selected.id)
-    this.currentIndex = globalIndex
-    this.showPrescription(globalIndex)
-    this.searchInputTarget.value = selected.title
-    this.filteredPrescriptions = [...this.allPrescriptions]
-    this.closeDropdown()
-  }
-
-  clearSearch() {
-    this.searchInputTarget.value = ""
-    this.filteredPrescriptions = [...this.allPrescriptions]
-    this.closeDropdown()
-    this.searchInputTarget.focus()
-  }
-
-  navigateNext() {
-    if (this.allPrescriptions.length === 0) return
-    this.currentIndex = (this.currentIndex + 1) % this.allPrescriptions.length
-    this.showPrescription(this.currentIndex)
-  }
-
-  navigatePrev() {
-    if (this.allPrescriptions.length === 0) return
-    this.currentIndex = (this.currentIndex - 1 + this.allPrescriptions.length) % this.allPrescriptions.length
-    this.showPrescription(this.currentIndex)
-  }
-
-  showPrescription(index) {
-    const p = this.allPrescriptions[index]
-    if (!p) return
-    this.selectedTitleTarget.textContent = p.title
-    this.contentBoxTarget.innerHTML = p.content
-    this.currentPrescription = p
-  }
-
-  copyPrescription() {
-    if (!this.currentPrescription) return
-    const text = this.contentBoxTarget.innerText
-    navigator.clipboard.writeText(text).then(() => this.showAlert())
-  }
-
-  addToEditor() {
-    if (!this.currentPrescription) return
-    const text = this.contentBoxTarget.innerText
-    const current = this.editorTarget.innerText.trim()
-    this.editorTarget.innerText = current ? current + "\n\n" + text : text
-    this.updateEditorButtons()
-    this.showAlert("✓ Adicionado ao editor!")
-  }
-
-  copyEdited() {
-    const text = this.editorTarget.innerText
-    navigator.clipboard.writeText(text).then(() => this.showAlert())
-  }
-
-  clearEditor() {
-    this.editorTarget.innerText = ""
-    this.updateEditorButtons()
-  }
-
-  onEditorChange() {
-    this.updateEditorButtons()
-  }
-
-  updateEditorButtons() {
-    const hasContent = this.editorTarget.innerText.trim().length > 0
-    this.copyEditedBtnTarget.classList.toggle("hidden", !hasContent)
-    this.clearEditorBtnTarget.classList.toggle("hidden", !hasContent)
+  handleOutsideClick(e) {
+    if (!this.element.contains(e.target)) {
+      this.categoryDropdownTarget?.classList.add("hidden")
+      this.dropdownTarget?.classList.add("hidden")
+    }
   }
 
   showAlert(message = "✓ Copiado para a área de transferência!") {
