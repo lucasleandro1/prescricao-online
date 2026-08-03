@@ -1,0 +1,71 @@
+<div class="min-h-screen bg-[#fafbfc] py-8 px-4">
+  <div class="max-w-5xl mx-auto">
+
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold bg-gradient-to-br from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+          Painel Admin
+        </h1>
+        <p class="text-sm text-[#64748b] mt-1"><%= Prescription.count %> prescrições no total</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <%= link_to "← Voltar ao site", root_path, class: "text-sm text-[#64748b] hover:text-blue-500 transition-colors" %>
+        <%= link_to "＋ Nova Prescrição", new_admin_prescription_path, class: "px-4 py-2 bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-xl text-sm font-medium shadow-md hover:shadow-lg hover:-translate-y-px transition-all" %>
+        <%= link_to "Sair", destroy_user_session_path, data: { turbo_method: :delete }, class: "px-4 py-2 border-2 border-[#e2e8f0] rounded-xl text-sm text-[#64748b] hover:border-red-300 hover:text-red-500 transition-all" %>
+      </div>
+    </div>
+
+    <%# Busca %>
+    <%= form_with url: admin_prescriptions_path, method: :get, local: true, class: "mb-6" do |f| %>
+      <div class="relative">
+        <%= f.text_field :q, value: @query, placeholder: "Buscar prescrições...",
+            class: "w-full px-5 pr-12 py-3 text-sm border-2 border-[#e2e8f0] rounded-xl bg-white outline-none focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)] transition-all" %>
+        <%= f.submit "Buscar", class: "absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-blue-500 text-white text-xs rounded-lg cursor-pointer hover:bg-blue-600 transition-colors" %>
+      </div>
+    <% end %>
+
+    <%# Tabela %>
+    <div class="bg-white rounded-2xl shadow-md border border-[#f1f5f9] overflow-hidden">
+      <% if @prescriptions.any? %>
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-[#f1f5f9] bg-[#fafbfc]">
+              <th class="text-left px-5 py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Título</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Categoria</th>
+              <th class="text-right px-5 py-3 text-xs font-semibold text-[#64748b] uppercase tracking-wide">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @prescriptions.each do |p| %>
+              <tr class="border-b border-[#f1f5f9] hover:bg-[#fafbfc] transition-colors">
+                <td class="px-5 py-3 text-sm text-[#1e293b] max-w-md">
+                  <span class="line-clamp-2"><%= p.title %></span>
+                </td>
+                <td class="px-5 py-3">
+                  <span class="inline-block px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full font-medium">
+                    <%= p.category %>
+                  </span>
+                </td>
+                <td class="px-5 py-3 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <%= link_to "Editar", edit_admin_prescription_path(p),
+                        class: "px-3 py-1.5 text-xs border border-[#e2e8f0] rounded-lg text-[#64748b] hover:border-blue-300 hover:text-blue-500 transition-all" %>
+                    <%= button_to "Deletar", admin_prescription_path(p), method: :delete,
+                        data: { turbo_confirm: "Tem certeza que deseja deletar \"#{p.title}\"?" },
+                        class: "px-3 py-1.5 text-xs border border-[#e2e8f0] rounded-lg text-[#64748b] hover:border-red-300 hover:text-red-500 transition-all cursor-pointer bg-transparent" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <div class="py-16 text-center text-[#94a3b8]">
+          <p class="text-lg mb-2">Nenhuma prescrição encontrada</p>
+          <%= link_to "Criar primeira prescrição", new_admin_prescription_path, class: "text-blue-500 hover:underline" %>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,12 @@
+<div class="min-h-screen bg-[#fafbfc] py-8 px-4">
+  <div class="max-w-3xl mx-auto">
+    <div class="flex items-center gap-3 mb-6">
+      <%= link_to "← Voltar", admin_prescriptions_path, class: "text-[#64748b] hover:text-blue-500 transition-colors" %>
+      <h1 class="text-2xl font-bold bg-gradient-to-br from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+        Editar Prescrição
+      </h1>
+    </div>
+
+    <%= render "form", prescription: @prescription %>
+  </div>
+</div>
