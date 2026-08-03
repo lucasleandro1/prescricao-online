@@ -9,19 +9,19 @@
     </div>
   <% end %>
 
-  <div class="bg-white rounded-2xl shadow-md border border-[#f1f5f9] p-6 space-y-5">
+  <div class="bg-white rounded-2xl shadow-md border border-[#ede9fe] p-6 space-y-5">
 
     <div>
       <%= f.label :title, "Título", class: "block text-sm font-semibold text-[#1e293b] mb-2" %>
       <%= f.text_field :title,
-          class: "w-full px-4 py-2.5 text-sm border-2 border-[#e2e8f0] rounded-xl outline-none focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)] transition-all",
+          class: "w-full px-4 py-2.5 text-sm border-2 border-[#e2e8f0] rounded-xl outline-none focus:border-violet-500 focus:shadow-[0_0_0_4px_rgba(139,92,246,0.12)] transition-all",
           placeholder: "Ex: Abscesso cutâneo - tratamento conservador" %>
     </div>
 
     <div>
       <%= f.label :category, "Categoria", class: "block text-sm font-semibold text-[#1e293b] mb-2" %>
       <%= f.text_field :category,
-          class: "w-full px-4 py-2.5 text-sm border-2 border-[#e2e8f0] rounded-xl outline-none focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)] transition-all",
+          class: "w-full px-4 py-2.5 text-sm border-2 border-[#e2e8f0] rounded-xl outline-none focus:border-violet-500 focus:shadow-[0_0_0_4px_rgba(139,92,246,0.12)] transition-all",
           placeholder: "Deixe em branco para extrair automaticamente do título" %>
       <p class="text-xs text-[#94a3b8] mt-1">Se vazio, será extraído automaticamente da primeira parte do título</p>
     </div>
@@ -29,7 +29,7 @@
     <div>
       <%= f.label :content, "Conteúdo (suporta HTML)", class: "block text-sm font-semibold text-[#1e293b] mb-2" %>
       <%= f.text_area :content, rows: 12,
-          class: "w-full px-4 py-2.5 text-sm border-2 border-[#e2e8f0] rounded-xl outline-none focus:border-blue-500 focus:shadow-[0_0_0_4px_rgba(59,130,246,0.1)] transition-all font-mono",
+          class: "w-full px-4 py-2.5 text-sm border-2 border-[#e2e8f0] rounded-xl outline-none focus:border-violet-500 focus:shadow-[0_0_0_4px_rgba(139,92,246,0.12)] transition-all font-mono",
           placeholder: "<strong>USO ORAL</strong>\n1 - <strong>MEDICAMENTO 500MG</strong> - QTD\nTOMARÁ 1 COMPRIMIDO DE 8/8H POR 7 DIAS." %>
       <p class="text-xs text-[#94a3b8] mt-1">Aceita tags HTML como &lt;strong&gt;, &lt;i&gt; e quebras de linha (\n)</p>
     </div>
@@ -37,7 +37,7 @@
     <div>
       <%= f.label :position, "Posição (opcional)", class: "block text-sm font-semibold text-[#1e293b] mb-2" %>
       <%= f.number_field :position,
-          class: "w-32 px-4 py-2.5 text-sm border-2 border-[#e2e8f0] rounded-xl outline-none focus:border-blue-500 transition-all",
+          class: "w-32 px-4 py-2.5 text-sm border-2 border-[#e2e8f0] rounded-xl outline-none focus:border-violet-500 transition-all",
           placeholder: "Auto" %>
     </div>
 
@@ -45,8 +45,8 @@
 
   <div class="flex items-center gap-3">
     <%= f.submit prescription.new_record? ? "Criar Prescrição" : "Salvar Alterações",
-        class: "px-6 py-2.5 bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-xl text-sm font-medium shadow-md hover:shadow-lg hover:-translate-y-px transition-all cursor-pointer" %>
+        class: "px-6 py-2.5 bg-gradient-to-br from-violet-500 to-violet-700 text-white rounded-xl text-sm font-medium shadow-md hover:shadow-lg hover:-translate-y-px transition-all cursor-pointer" %>
     <%= link_to "Cancelar", admin_prescriptions_path,
-        class: "px-6 py-2.5 border-2 border-[#e2e8f0] rounded-xl text-sm text-[#64748b] hover:border-blue-300 hover:text-blue-500 transition-all" %>
+        class: "px-6 py-2.5 border-2 border-[#e2e8f0] rounded-xl text-sm text-[#64748b] hover:border-violet-300 hover:text-violet-500 transition-all" %>
   </div>
 <% end %>

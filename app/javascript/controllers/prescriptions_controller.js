@@ -51,7 +51,7 @@ export default class extends Controller {
       list.forEach((cat, i) => {
         const count = this.allPrescriptions.filter(p => p.category === cat).length
         const item = document.createElement("div")
-        item.className = "px-5 py-3 cursor-pointer border-b border-[#f1f5f9] last:border-b-0 text-sm text-[#1e293b] transition-all flex justify-between items-center"
+        item.className = "px-5 py-3 cursor-pointer border-b border-[#ede9fe] last:border-b-0 text-sm text-[#1e293b] transition-all flex justify-between items-center"
         item.innerHTML = `<span>${cat}</span><span class="text-xs text-[#94a3b8]">${count}</span>`
         item.dataset.index = i
         item.addEventListener("click", () => this.selectCategory(cat))
@@ -132,7 +132,7 @@ export default class extends Controller {
     } else {
       list.slice(0, 100).forEach((p, i) => {
         const item = document.createElement("div")
-        item.className = "px-5 py-3 cursor-pointer border-b border-[#f1f5f9] last:border-b-0 text-sm text-[#1e293b] transition-all"
+        item.className = "px-5 py-3 cursor-pointer border-b border-[#ede9fe] last:border-b-0 text-sm text-[#1e293b] transition-all"
         item.textContent = p.title
         item.dataset.index = i
         item.addEventListener("click", () => this.selectPrescription(p))
@@ -245,8 +245,8 @@ export default class extends Controller {
   highlightItems(dropdown, activeIndex) {
     dropdown.querySelectorAll("[data-index]").forEach((item, i) => {
       if (i === activeIndex) {
-        item.style.background = "linear-gradient(135deg, rgba(59,130,246,0.06), rgba(6,182,212,0.06))"
-        item.style.color = "#3b82f6"
+        item.style.background = "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(217,70,239,0.06))"
+        item.style.color = "#7c3aed"
         item.scrollIntoView({ block: "nearest" })
       } else {
         item.style.background = ""
