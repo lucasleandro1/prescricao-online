@@ -1,0 +1,58 @@
+name: Backup do banco de produção
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # 03:00 America/Sao_Paulo
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar cliente PostgreSQL
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Dump do banco
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: pg_dump --format=custom --file=db.dump "$DATABASE_URL"
+
+      - name: Criptografar dump
+        env:
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+        run: |
+          openssl enc -aes-256-cbc -pbkdf2 -salt \
+            -in db.dump -out db.dump.enc -k "$BACKUP_ENCRYPTION_KEY"
+          rm db.dump
+
+      - name: Publicar backup no branch db-backups
+        run: |
+          git config user.name "backup-bot"
+          git config user.email "backup-bot@users.noreply.github.com"
+
+          FILENAME="backups/db-$(date -u +%Y%m%d-%H%M%S).dump.enc"
+
+          if git ls-remote --exit-code --heads origin db-backups > /dev/null 2>&1; then
+            git fetch origin db-backups
+            git checkout -b db-backups origin/db-backups
+          else
+            git checkout --orphan db-backups
+            git rm -rf . > /dev/null 2>&1 || true
+          fi
+
+          mkdir -p backups
+          mv db.dump.enc "$FILENAME"
+
+          # mantém só os últimos 30 backups
+          ls -1t backups/*.dump.enc | tail -n +31 | xargs -r rm --
+
+          git add "$FILENAME"
+          git add -A backups
+          git commit -m "backup: $FILENAME" || echo "nada para commitar"
+          git push origin db-backups
